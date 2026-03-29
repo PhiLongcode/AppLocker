@@ -2,13 +2,19 @@ using System.IO;
 
 namespace AppLocker.Presentation;
 
-/// <summary>Đường dẫn dữ liệu cạnh exe (Data/applocker.db).</summary>
+/// <summary>Đường dẫn dữ liệu trong %LOCALAPPDATA%\AppLocker.</summary>
 public static class AppDataPaths
 {
+    public static string GetDataDirectory()
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var dataDir = Path.Combine(localAppData, "AppLocker");
+        Directory.CreateDirectory(dataDir);
+        return dataDir;
+    }
+
     public static string GetDatabasePath()
     {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "Data");
-        Directory.CreateDirectory(dataDir);
-        return Path.Combine(dataDir, "applocker.db");
+        return Path.Combine(GetDataDirectory(), "applocker.db");
     }
 }

@@ -53,6 +53,6 @@ $s2.Description = 'AppLocker tray + auto monitor'
 $s2.Save()
 Write-Host "Shortcut: $scBg"
 
-$dataPath = Join-Path $outDir 'Data'
+$dataPath = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'AppLocker'
 Write-Host ""
-Write-Host "Done. Data folder: $dataPath"
+Write-Host "Done. Data folder (AppData): $dataPath"
