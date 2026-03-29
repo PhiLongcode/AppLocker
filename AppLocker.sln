@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLocker.Tests", "tests\AppLocker.Tests\AppLocker.Tests.csproj", "{66666666-6666-6666-6666-666666666666}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLocker.Domain", "src\AppLocker.Domain\AppLocker.Domain.csproj", "{11111111-1111-1111-1111-111111111111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLocker.Watchdog", "src\AppLocker.Watchdog\AppLocker.Watchdog.csproj", "{77777777-7777-7777-7777-777777777777}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLocker.Service", "src\AppLocker.Service\AppLocker.Service.csproj", "{88888888-8888-8888-8888-888888888888}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLocker.Application", "src\AppLocker.Application\AppLocker.Application.csproj", "{22222222-2222-2222-2222-222222222222}"
 EndProject
