@@ -31,6 +31,7 @@ public class EventBasedMonitorServiceTests
     public void Stop_ShouldCallWatcherStopListening()
     {
         var service = CreateService();
+        service.Start();
         service.Stop();
 
         _watcherMock.Verify(w => w.StopListening(), Times.Once);

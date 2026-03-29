@@ -13,6 +13,8 @@ public class RuleEngineService
 
     public void AddRule(AppRule rule) => _rules.Add(rule);
 
+    public void ClearRules() => _rules.Clear();
+
     public void RemoveRule(string processName) =>
         _rules.RemoveAll(r => r.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase));
 

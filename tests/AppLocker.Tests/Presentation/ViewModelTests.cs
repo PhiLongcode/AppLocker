@@ -16,20 +16,32 @@ public class SettingsViewModelTests : IDisposable
 {
     private readonly string _tempFile;
     private readonly RuleEngineService _engine;
-    private readonly JsonStorageService _storage;
+    private readonly SqliteStorageService _storage;
     private readonly ObservableCollection<AppRuleItem> _mainList;
 
     public SettingsViewModelTests()
     {
-        _tempFile = Path.Combine(Path.GetTempPath(), $"vm_test_{Guid.NewGuid()}.json");
+        _tempFile = Path.Combine(Path.GetTempPath(), $"vm_test_{Guid.NewGuid()}.db");
         _engine = new RuleEngineService();
-        _storage = new JsonStorageService(_tempFile);
+        _storage = new SqliteStorageService(_tempFile);
         _mainList = new ObservableCollection<AppRuleItem>();
     }
 
     public void Dispose()
     {
-        if (File.Exists(_tempFile)) File.Delete(_tempFile);
+        _storage.Dispose();
+        for (var i = 0; i < 10 && File.Exists(_tempFile); i++)
+        {
+            try
+            {
+                File.Delete(_tempFile);
+                break;
+            }
+            catch (IOException)
+            {
+                System.Threading.Thread.Sleep(20);
+            }
+        }
     }
 
     private SettingsViewModel CreateVm() =>

@@ -1,5 +1,6 @@
 using AppLocker.Application.Services;
 using AppLocker.Domain.Entities;
+using AppLocker.Infrastructure.Services;
 using AppLocker.Infrastructure.Storage;
 using AppLocker.Presentation.Infrastructure;
 using AppLocker.Presentation.Models;
@@ -14,7 +15,7 @@ namespace AppLocker.Presentation.ViewModels;
 public class SettingsViewModel : BaseViewModel
 {
     private readonly RuleEngineService _ruleEngine;
-    private readonly JsonStorageService _storage;
+    private readonly SqliteStorageService _storage;
     private readonly ObservableCollection<AppRuleItem> _mainList;
 
     private string _newProcessName = string.Empty;
@@ -22,13 +23,28 @@ public class SettingsViewModel : BaseViewModel
     private int _timeLimitMinutes = 60;
     private AppRuleItem? _selectedItem;
     private string _statusMessage = string.Empty;
+    private InstalledAppItem? _selectedPreset;
 
     public ObservableCollection<AppRuleItem> Rules { get; } = new();
+
+    /// <summary>Ứng dụng đã cài (Registry) — chọn để điền tên process.</summary>
+    public ObservableCollection<InstalledAppItem> PresetApps { get; } = new();
 
     public string NewProcessName
     {
         get => _newProcessName;
         set => SetProperty(ref _newProcessName, value);
+    }
+
+    public InstalledAppItem? SelectedPreset
+    {
+        get => _selectedPreset;
+        set
+        {
+            if (!SetProperty(ref _selectedPreset, value)) return;
+            if (value is not null && !string.IsNullOrWhiteSpace(value.ProcessName))
+                NewProcessName = value.ProcessName;
+        }
     }
 
     public string SelectedRuleType
@@ -61,16 +77,17 @@ public class SettingsViewModel : BaseViewModel
         set => SetProperty(ref _statusMessage, value);
     }
 
-    public List<string> RuleTypes { get; } = new() { "Block", "LimitTime" };
+    public List<string> RuleTypes { get; } = new() { "Block", "LimitTime", "PasswordLock" };
 
     public ICommand AddRuleCommand { get; }
     public ICommand RemoveRuleCommand { get; }
     public ICommand ToggleRuleCommand { get; }
     public ICommand SaveCommand { get; }
+    public ICommand ReloadPresetAppsCommand { get; }
 
     public SettingsViewModel(
         RuleEngineService ruleEngine,
-        JsonStorageService storage,
+        SqliteStorageService storage,
         ObservableCollection<AppRuleItem> mainList)
     {
         _ruleEngine = ruleEngine;
@@ -87,10 +104,38 @@ public class SettingsViewModel : BaseViewModel
                 IsEnabled = r.IsEnabled
             });
 
+        LoadPresetApps();
+
         AddRuleCommand = new RelayCommand(AddRule, () => !string.IsNullOrWhiteSpace(NewProcessName));
         RemoveRuleCommand = new RelayCommand(RemoveRule, () => SelectedItem is not null);
         ToggleRuleCommand = new RelayCommand(ToggleRule, () => SelectedItem is not null);
         SaveCommand = new RelayCommand(Save);
+        ReloadPresetAppsCommand = new RelayCommand(LoadPresetApps);
+    }
+
+    private void LoadPresetApps()
+    {
+        PresetApps.Clear();
+        SelectedPreset = null;
+        try
+        {
+            var svc = new InstalledProgramsService();
+            foreach (var r in svc.EnumerateInstalledPrograms()
+                         .OrderBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase))
+            {
+                PresetApps.Add(new InstalledAppItem
+                {
+                    DisplayName = r.DisplayName,
+                    ProcessName = r.ProcessName,
+                    Publisher = r.Publisher,
+                    ExecutablePath = r.ExecutablePath
+                });
+            }
+        }
+        catch
+        {
+            // Không có quyền Registry hoặc lỗi — vẫn cho nhập tay
+        }
     }
 
     private void AddRule()
@@ -112,15 +157,21 @@ public class SettingsViewModel : BaseViewModel
 
         Rules.Add(item);
         NewProcessName = string.Empty;
+        SelectedPreset = null;
         StatusMessage = $"✅ Đã thêm: {name}";
     }
 
     private void RemoveRule()
     {
-        if (SelectedItem is null) return;
-        Rules.Remove(SelectedItem);
-        StatusMessage = $"🗑 Đã xóa: {SelectedItem.ProcessName}";
+        var item = SelectedItem;
+        if (item is null) return;
+
+        // Capture trước khi Remove: ListView two-way binding có thể set SelectedItem = null
+        // ngay trong CollectionChanged → dùng SelectedItem sau Remove gây NullReferenceException.
+        var name = item.ProcessName;
         SelectedItem = null;
+        Rules.Remove(item);
+        StatusMessage = $"🗑 Đã xóa: {name}";
     }
 
     private void ToggleRule()
@@ -144,8 +195,7 @@ public class SettingsViewModel : BaseViewModel
 
         _storage.SaveRules(domainRules);
 
-        // Refresh rule engine
-        foreach (var r in domainRules) _ruleEngine.RemoveRule(r.ProcessName);
+        _ruleEngine.ClearRules();
         foreach (var r in domainRules) _ruleEngine.AddRule(r);
 
         StatusMessage = $"💾 Đã lưu {domainRules.Count} rule(s) thành công!";

@@ -1,4 +1,5 @@
 using AppLocker.Application.Services;
+using AppLocker.Domain.Interfaces;
 using FluentAssertions;
 
 namespace AppLocker.Tests.Application;
@@ -81,5 +82,25 @@ public class PasswordServiceTests
         var hash2 = _service.StoredHash;
 
         hash1.Should().NotBe(hash2);
+    }
+
+    private sealed class MemoryPasswordStore : IMasterPasswordStore
+    {
+        public string? Hash { get; set; }
+        public string? LoadMasterPasswordHash() => Hash;
+        public void SaveMasterPasswordHash(string sha256HexLower) => Hash = sha256HexLower;
+    }
+
+    [Fact]
+    public void SetPassword_WithStore_ShouldAllowNewInstanceToVerify()
+    {
+        var mem = new MemoryPasswordStore();
+        var first = new PasswordService(mem);
+        first.SetPassword("persist-me");
+
+        var second = new PasswordService(mem);
+        second.IsPasswordSet.Should().BeTrue();
+        second.Verify("persist-me").Should().BeTrue();
+        second.Verify("wrong").Should().BeFalse();
     }
 }

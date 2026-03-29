@@ -96,6 +96,21 @@ public class RuleEvaluatorTests
         result.ShouldBlock.Should().BeFalse();
     }
 
+    // ── PasswordLock ──────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Evaluate_WhenPasswordLock_ShouldBlockAndRequirePasswordUnlock()
+    {
+        var rules = new[] { new AppRule { ProcessName = "chrome", Type = RuleType.PasswordLock } };
+        var evaluator = new RuleEvaluator(rules);
+
+        var result = evaluator.Evaluate(MakeProcess("chrome"));
+
+        result.ShouldBlock.Should().BeTrue();
+        result.RequiresPasswordUnlock.Should().BeTrue();
+        result.ExecutablePath.Should().Be($@"C:\chrome.exe");
+    }
+
     // ── AppRule Entity ────────────────────────────────────────────────────────
 
     [Fact]
@@ -110,9 +125,10 @@ public class RuleEvaluatorTests
     [Theory]
     [InlineData("Block")]
     [InlineData("LimitTime")]
+    [InlineData("PasswordLock")]
     public void RuleType_AllValues_ShouldParseCorrectly(string typeName)
     {
         var parsed = Enum.Parse<RuleType>(typeName);
-        parsed.Should().BeOneOf(RuleType.Block, RuleType.LimitTime);
+        parsed.Should().BeOneOf(RuleType.Block, RuleType.LimitTime, RuleType.PasswordLock);
     }
 }

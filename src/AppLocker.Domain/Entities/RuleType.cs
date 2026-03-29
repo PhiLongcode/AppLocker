@@ -9,5 +9,8 @@ public enum RuleType
     Block,
 
     /// <summary>Giới hạn thời gian sử dụng theo phút</summary>
-    LimitTime
+    LimitTime,
+
+    /// <summary>Khóa bằng mật khẩu (yêu cầu master password trong Settings để mở)</summary>
+    PasswordLock
 }

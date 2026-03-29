@@ -37,7 +37,10 @@ public class AppRuleItem : BaseViewModel
     }
 
     public string StatusText => IsEnabled ? "🟢 Active" : "⚫ Disabled";
-    public string RuleDescription => RuleType == "LimitTime"
-        ? $"Giới hạn {TimeLimitMinutes} phút/ngày"
-        : "Chặn hoàn toàn";
+    public string RuleDescription => RuleType switch
+    {
+        "LimitTime" => $"Giới hạn {TimeLimitMinutes} phút/ngày",
+        "PasswordLock" => "Khóa bằng mật khẩu (Cần Unlock)",
+        _ => "Chặn hoàn toàn"
+    };
 }

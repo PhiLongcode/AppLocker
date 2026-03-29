@@ -26,6 +26,17 @@ public class RuleEngineServiceTests
     }
 
     [Fact]
+    public void ClearRules_ShouldRemoveAll()
+    {
+        _service.AddRule(new AppRule { ProcessName = "a", Type = RuleType.Block });
+        _service.AddRule(new AppRule { ProcessName = "b", Type = RuleType.Block });
+
+        _service.ClearRules();
+
+        _service.Rules.Should().BeEmpty();
+    }
+
+    [Fact]
     public void RemoveRule_ByProcessName_ShouldDeleteFromList()
     {
         _service.AddRule(new AppRule { ProcessName = "chrome", Type = RuleType.Block });
@@ -174,6 +185,38 @@ public class MonitorServiceTests
         monitor.Check();
 
         _enforcementMock.Verify(e => e.Kill(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void Check_WhenPasswordLock_ShouldKillAndInvokePresenter()
+    {
+        var process = new ProcessInfo { Name = "chrome", ProcessId = 1, FullPath = @"C:\chrome.exe" };
+        _processServiceMock
+            .Setup(s => s.GetRunningProcesses())
+            .Returns(new[] { process });
+        _ruleEvaluatorMock
+            .Setup(e => e.Evaluate(process))
+            .Returns(new RuleResult
+            {
+                ShouldBlock = true,
+                RequiresPasswordUnlock = true,
+                ProcessName = "chrome",
+                ExecutablePath = @"C:\chrome.exe"
+            });
+        var presenterMock = new Mock<IPasswordLockPresenter>();
+        presenterMock
+            .Setup(p => p.PromptUnlock("chrome", @"C:\chrome.exe"))
+            .Returns(false);
+
+        var monitor = new MonitorService(
+            _processServiceMock.Object,
+            _ruleEvaluatorMock.Object,
+            _enforcementMock.Object,
+            presenterMock.Object);
+        monitor.Check();
+
+        _enforcementMock.Verify(e => e.Kill("chrome"), Times.AtLeastOnce);
+        presenterMock.Verify(p => p.PromptUnlock("chrome", @"C:\chrome.exe"), Times.Once);
     }
 
     [Fact]

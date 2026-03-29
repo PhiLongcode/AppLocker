@@ -6,7 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="Moq" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -23,6 +29,7 @@
     <ProjectReference Include="..\..\src\AppLocker.Domain\AppLocker.Domain.csproj" />
     <ProjectReference Include="..\..\src\AppLocker.Application\AppLocker.Application.csproj" />
     <ProjectReference Include="..\..\src\AppLocker.Infrastructure\AppLocker.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\AppLocker.Presentation\AppLocker.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

@@ -35,6 +35,18 @@ public class RuleEvaluator : IRuleEvaluator
             };
         }
 
+        if (matchedRule.Type == RuleType.PasswordLock)
+        {
+            return new RuleResult
+            {
+                ShouldBlock = true,
+                RequiresPasswordUnlock = true,
+                Reason = $"Process '{process.Name}' requires password unlock.",
+                ProcessName = process.Name,
+                ExecutablePath = string.IsNullOrEmpty(process.FullPath) ? null : process.FullPath
+            };
+        }
+
         // RuleType.LimitTime - sẽ được xử lý bởi UsageTrackingService ở Phase 3
         return new RuleResult { ShouldBlock = false, ProcessName = process.Name };
     }
