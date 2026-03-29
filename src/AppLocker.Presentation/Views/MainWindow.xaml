@@ -59,12 +59,10 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Section title -->
-            <TextBlock Grid.Row="0" Text="Danh sách Rule đang cấu hình"
+            <TextBlock Grid.Row="0" Text="DANH SÁCH RULE ĐANG CẤU HÌNH"
                        Foreground="{StaticResource TextSecondaryBrush}"
                        FontSize="12" FontWeight="SemiBold"
-                       Margin="0,0,0,10" TextTransform="Uppercase"
-                       LetterSpacing="1"/>
+                       Margin="0,0,0,10"/>
 
             <!-- Rules ListView -->
             <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}"
@@ -73,7 +71,6 @@
                 <ListView x:Name="RulesList"
                           ItemsSource="{Binding Rules}"
                           SelectedItem="{Binding SelectedRule}"
-                          Style="{StaticResource DarkListView}"
                           ItemContainerStyle="{StaticResource DarkListViewItem}"
                           Padding="0">
                     <ListView.View>

@@ -5,6 +5,7 @@ using AppLocker.Infrastructure.Storage;
 using AppLocker.Presentation.Infrastructure;
 using AppLocker.Presentation.Models;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
@@ -109,7 +110,7 @@ public class MainViewModel : BaseViewModel
     {
         var vm = new SettingsViewModel(_ruleEngine, _storage, Rules);
         var win = new Views.SettingsWindow { DataContext = vm };
-        win.Owner = Application.Current.MainWindow;
+        win.Owner = System.Windows.Application.Current.MainWindow;
         if (win.ShowDialog() == true)
         {
             // Reload sau khi settings thay đổi
