@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppLocker.Domain\AppLocker.Domain.csproj" />
+    <ProjectReference Include="..\AppLocker.Application\AppLocker.Application.csproj" />
+    <ProjectReference Include="..\AppLocker.Shared\AppLocker.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
